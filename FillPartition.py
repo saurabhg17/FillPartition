@@ -1,4 +1,4 @@
-"""Fill free space in a partition with files containing zero bytes
+"""Fill free space in a partition with files containing zero bytes.
 
 The purpose of this script is to allow the user to fill the entire 
 free space in the specified partition with files containing zero bytes
@@ -10,12 +10,11 @@ should be written. If the optional argument is not specified, it is
 set to the partition path.
 
 Examples:
-python FillPartition.py -od C:\Users\USER_NAME\ C:
+python FillPartition.py -od C:\\Users\\USER_NAME\\ C:
 python FillPartition.py -od /home/USER_NAME /
 
 Note that the output directory should have write permission for the 
 current user, otherwise the script will fail. 
-
 """
 
 import argparse, random, shutil
@@ -23,7 +22,7 @@ from timeit import default_timer as __timer
 
 
 __author__    = "Saurabh Garg"
-__copyright__ = "Copyright 2019, Saurabh Garg"]
+__copyright__ = "Copyright 2019, Saurabh Garg"
 __license__   = "MIT"
 __version__   = "1.0"
 __email__     = "saurabhgarg@mysoc.net"
