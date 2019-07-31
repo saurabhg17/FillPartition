@@ -17,7 +17,7 @@ Note that the output directory should have write permission for the
 current user, otherwise the script will fail. 
 """
 
-import argparse, random, shutil
+import argparse, os, random, shutil
 from timeit import default_timer as __timer
 
 
@@ -39,6 +39,8 @@ def fillPartition():
 	
 	if args.outputDir is "":
 		args.outputDir = args.partition
+	else:
+		args.outputDir = os.path.normpath(args.outputDir)
 	
 	# Print partition statistics.
 	usage = shutil.disk_usage(args.partition)
@@ -46,35 +48,48 @@ def fillPartition():
 	used  = usage[1] / (1024 * 1024 * 1024)
 	free  = usage[2] / (1024 * 1024 * 1024)
 	
-	print("\nPartition statistics:")
+	print("")	
+	print("Partition statistics:")
 	print("Total size of the partition      : {:7.2f} GB".format(total))
 	print("Used size of the partition       : {:7.2f} GB".format(used))
 	print("Free space available in partition: {:7.2f} GB".format(free))
-	print("\n")
+	print("")
+	
+	if usage[2] == 0:
+		print("Available free space is already 0.")
+		return
 	
 	# Initialize DATA of size 1GB with all zeros.
-	start = __timer()
-	print("Initialize data for writing...", end="")
 	global __DATA
 	if free > 1:
 		__DATA = bytearray(__BUFFER_SIZE)
 	end = __timer()
-	print("  took {:.3f} seconds".format(end - start))
-	print("\n")
 	
 	# Fill partition with 1GB files until free space is less than 1GB.
-	for i in range(int(free)):
-		__write1GBFile(args.outputDir)
+	num1GBFiles = int(free)
+	if num1GBFiles > 0:
+		print("Writing {} 1GB files".format(num1GBFiles))
+		for i in range(num1GBFiles):
+			__write1GBFile(args.outputDir)
+		print("Finihsed writing 1GB files.")
+		print("")
 	
 	# Fill remaining free space in the partition with a single file.
 	usage = shutil.disk_usage(args.partition)
-	__writeFile(args.outputDir, usage[2])
+	free  = usage[2]
+	if free > 0:
+		print("Free space left {} bytes.".format(free))
+		print("Writing last {} bytes file.".format(free))
+		__writeFile(args.outputDir, free)
+	
+	print("")
+	print("Free disk space is now 0 bytes.")
 
 
 def __generateFileName(outputDir):
-	return "{}/{:.0f}".format(outputDir, random.uniform(1000000, 9999999))
+	return os.path.join(outputDir, "{:.0f}".format(random.uniform(1000000, 9999999)))
 
-	
+
 def __write1GBFile(outputDir):
 	start = __timer()
 	
@@ -94,8 +109,11 @@ def __writeFile(outputDir, fileLength):
 	fileName = __generateFileName(outputDir)
 	print("Writing {}...".format(fileName), end="")
 	
-	with open(fileName, 'w+b') as file:
-		file.write(bytearray(fileLength))
+	try:
+		with open(fileName, 'w+b') as file:
+			file.write(bytearray(fileLength))
+	except Exception as e:
+		doNothing = 0
 	
 	end = __timer()
 	print("  took {:.3f} seconds.".format(end - start))
