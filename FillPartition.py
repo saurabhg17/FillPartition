@@ -28,7 +28,8 @@ __version__   = "1.0"
 __email__     = "saurabhgarg@mysoc.net"
 
 
-__BUFFER_SIZE = 1024 * 1024 * 1024
+__NUM_ITERS   = 1024
+__BUFFER_SIZE = 1024 * 1024
 __DATA        = None
 
 def fillPartition():
@@ -97,7 +98,8 @@ def __write1GBFile(outputDir):
 	print("Writing {}...".format(fileName), end="")
 	
 	with open(fileName, 'w+b') as file:
-		file.write(__DATA)
+		for i in range(0, __NUM_ITERS):
+			file.write(__DATA)
 	
 	end = __timer()
 	print("  took {:.3f} seconds.".format(end - start))
@@ -111,7 +113,10 @@ def __writeFile(outputDir, fileLength):
 	
 	try:
 		with open(fileName, 'w+b') as file:
-			file.write(bytearray(fileLength))
+			numIters = int(fileLength/__BUFFER_SIZE)
+			for i in range(0, numIters):
+				file.write(__DATA)
+			file.write(bytearray(fileLength - numIters*__BUFFER_SIZE))
 	except Exception as e:
 		doNothing = 0
 	
